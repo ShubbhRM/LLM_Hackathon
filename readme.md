@@ -1,197 +1,118 @@
-# 🚀 RAG-Powered Code Tutor (with LM Studio & Streamlit)
+# 🚀 LLM Hackathon: Retrieval-Augmented Code Tutor & Optimizer
 
-A **Retrieval-Augmented Generation (RAG)** system for local code tutoring, error hinting, and GPU optimization—grounded in your custom documentation, running entirely **offline** with [LM Studio](https://lmstudio.ai/) and a powerful open-source LLM (`Qwen2.5-Coder-14B`).
-
----
-
-## 🏗️ Architecture Overview
-
-**1. User Interface (Streamlit Web App):**
-- User selects a mode: Generate Code, Code Hints, or GPU Optimization.
-- User provides a task description or code.
-
-**2. Document Processing & Storage:**
-- All your docs, code, and PDFs are preprocessed and **chunked** into manageable pieces.
-- Chunks are embedded (converted into vectors) and stored in a **Chroma Vector Database**.
-
-**3. Retrieval & Prompt Assembly:**
-- For every query, the most relevant chunks are retrieved from the vector DB (using semantic similarity).
-- These chunks are inserted (with citations) into one of three carefully designed prompt templates.
-
-**4. Local LLM Inference (via LM Studio):**
-- The prompt (with context) is sent to **LM Studio** over the OpenAI-compatible API (`localhost:1234/v1/chat/completions`).
-- **Qwen2.5-Coder-14B** processes the prompt and returns an answer, which is shown to the user.
+Welcome to the **LLM Hackathon Project**!  
+This repository contains a Retrieval-Augmented Generation (RAG) system that combines your own code/data science documentation with a large language model (LLM) running locally—**no API key, no cloud required!**
 
 ---
 
-### 📊 Architecture Diagram
+## 🧑‍🎓 What Will You Learn Here?
 
-```mermaid
-flowchart TD
-    A[User (Browser)]
-    B[Streamlit App]
-    C[Prompt Templates]
-    D[Chroma Vector DB]
-    E[LM Studio API (localhost)]
-    F[Qwen2.5-Coder-14B Model]
-    G[Local Dataset (.py/.ipynb/.md/.pdf)]
-    H[auto_chunker.py & build_index.py]
-    
-    A --> B
-    B --> D
-    D --> B
-    B --> C
-    B --> E
-    C --> B
-    E --> F
-    F --> E
-    E --> B
-    B --> A
-    G --> H
-    H --> D
+- How Retrieval-Augmented Generation (RAG) works
+- How to preprocess and index Jupyter notebooks, Markdown, PDFs, and Python files for search
+- How to run LLMs like `Qwen2.5-Coder-14B` fully offline with LM Studio
+- How to build a Streamlit app for interactive code generation, hints, and GPU optimization
+
+---
+
+## 🏗️ What Does This Project Do?
+
+- **Code Generation:**  
+  Generate clear, well-commented ML/data science code, citing your documentation.
+- **Code Correction:**  
+  Get hints on bugs or inefficiencies in your own code—no direct answers!
+- **GPU Optimization:**  
+  Receive suggestions to rewrite code for PyTorch, RAPIDS, cuDF, etc., to use the GPU.
+- **Source Attribution:**  
+  Every answer cites the specific file(s) and chunk(s) used for the response.
+
+---
+
+## 📦 Project Structure
+hackathon-project/
+├── app.py # Streamlit app
+├── auto_chunker.py # Chunks and processes dataset/
+├── build_index.py # Builds embeddings and vector DB
+├── rag_utils.py # Retrieval logic
+├── llm_utils.py # LM Studio/OpenAI API wrapper
+├── prompt_templates.py # Prompt templates
+├── requirements.txt # Python dependencies
+├── README.md # You're reading it!
+├── .gitignore # Ignores large/generated files
+├── dataset/ # All your docs/code (organized in subfolders)
+│ ├── cupy/
+│ ├── cudf/
+│ ├── cuml/
+│ └── ...
+└── chroma_db/ # (auto-generated, ignore in git)
 
 
-📝 Step-by-Step Guide
-1. Install Prerequisites
-Download LM Studio and install for your OS.
+---
 
-Python 3.9–3.11 recommended.
+## ⚙️ Setup & Commands
 
-2. Prepare Python Environment
-bash
-Copy
-Edit
+### 1. **Install LM Studio**
+
+- Download from [lmstudio.ai](https://lmstudio.ai/) for your OS.
+- Open LM Studio, search for, download, and **load** the model:  
+  `qwen/qwen2.5-coder-14b`
+- Ensure the API server is running (default: `localhost:1234`).
+
+### 2. **Install Python Requirements**
+
+```bash
 pip install -r requirements.txt
-# If you see errors about 'openai.ChatCompletion', do:
 pip install "openai<1.0.0"
-Example requirements.txt:
+```
 
-text
-Copy
-Edit
-streamlit
-openai==0.28.1
-chromadb
-sentence-transformers
-pdfplumber
-PyMuPDF
-tqdm
-3. Gather and Chunk Your Data
-Place all .ipynb, .py, .md, and .pdf files in a folder called dataset/.
+### 3. **Add Your Data**
+- Put all your .ipynb, .py, .md, and .pdf files in the dataset/ folder (subfolders like cupy, cudf, etc., are fine!).
 
-bash
-Copy
-Edit
+
+### 4. **Chunk & Index Your Data**
+```bash
 python auto_chunker.py
-This creates chunks.jsonl with all split chunks.
-
-4. Build the Vector Index
-bash
-Copy
-Edit
 python build_index.py
-This creates your Chroma vector DB.
+```
 
-5. Load Model in LM Studio
-Open LM Studio.
+- This creates chunks.jsonl and builds your vector database in chroma_db/.
 
-Download and load qwen/qwen2.5-coder-14b.
+### 5. **Run the Streamlit Web App**
 
-Make sure the API Server is running (localhost:1234).
-
-6. Start the App
-bash
-Copy
-Edit
+```bash
 streamlit run app.py
-Interact with your local code tutor!
+```
 
-🎛️ How the App Works
-User input:
+- The app will open in your browser.
+- Choose Code Generation, Code Hints, or GPU Optimization mode.
 
-Choose between Generate Code, Get Hints, or GPU Optimize.
 
-Enter task description or code.
 
-Context Retrieval:
 
-Top-k most relevant document chunks are retrieved using semantic search from the Chroma vector DB.
+###  Example Prompts
 
-These chunks (with citations) are passed into the prompt template.
+**Code Generation:**
+- Write a well-commented PyTorch program to classify MNIST digits using GPU if possible. Cite examples from the context if relevant.
 
-Prompt Formatting:
 
-Templates enforce that the model only uses context; otherwise, it says “I don’t know.”
+**Code Correction:**
+- Here is my cuDF code for loading a CSV and filtering by column. Can you give me hints if there are any bugs or inefficiencies?
 
-LLM Answer:
+**GPU Optimization:**
+- Optimize this pandas code for RAPIDS/cuDF on GPU and explain why the changes help.
 
-Prompt is sent to LM Studio over the local OpenAI-compatible API.
 
-Answer is returned and displayed with source citations.
 
-💡 Prompt Templates (Key Modes)
-1. Code Generation
+### How Does This Work?
 
-text
-Copy
-Edit
-You are an expert Python tutor and ML engineer.
+**Retrieval:**
+Finds the most relevant chunks from your own files for every question.
 
-Context:
-{context_chunks}
+**Prompting:**
+Uses only those chunks to build a prompt, enforcing “I don’t know” if the answer isn’t grounded in your docs.
 
-Task:
-Generate well-commented Python code for the following ML or data science task:
-"{task}"
+**LLM Inference:**
+Calls your local LLM via LM Studio (no cloud/API key needed).
 
-- Use PyTorch or RAPIDS where possible.
-- Add clear, brief comments.
-- If you use examples or code patterns from the context, cite their sources in brackets, e.g., [1], [2].
-- If the answer is not in the context, reply "I don't know."
-2. Code Correction (Hints)
+**Display:**
+Shows the result in Streamlit, with sources.
 
-text
-Copy
-Edit
-You are an expert Python tutor and ML engineer.
-
-Context:
-{context_chunks}
-
-A student submitted the following Python code:
-{code}
-
-Analyze this code and, using only the context above:
-- If there are bugs, logical errors, or inefficiencies, give **only hints** (not full solutions).
-- Explain why each hint matters for data science or ML.
-- If relevant, cite context sources in brackets, e.g., [1], [2].
-- If the context is insufficient, reply "I don't know."
-3. GPU Optimization
-
-text
-Copy
-Edit
-You are an expert in GPU optimization for Python ML/data science workflows.
-
-Context:
-{context_chunks}
-
-Given the following Python code:
-{code}
-
-- Suggest modifications to maximize GPU usage (e.g., PyTorch `.cuda()`, RAPIDS/cuDF, cuML, etc.) using only the context above.
-- Explain how your changes will improve time or memory complexity.
-- Output the optimized code and a short explanation.
-- Cite context sources in brackets, e.g., [1], [2].
-- If the context is insufficient, reply "I don't know."
-🛠️ File-by-File Breakdown
-File	Purpose
-auto_chunker.py	Splits all docs/code into manageable text/code chunks, supports .ipynb, .py, .md, .pdf
-build_index.py	Embeds all chunks and stores in ChromaDB for semantic retrieval
-rag_utils.py	Retrieves top-k relevant chunks for user query, with citations
-llm_utils.py	Connects to LM Studio via OpenAI API (localhost:1234/v1/chat/completions)
-prompt_templates.py	Contains all prompt templates for code gen, hints, GPU optimization
-app.py	Streamlit app UI for hackathon judges/demo
-chunks.jsonl	Your preprocessed data after chunking
-requirements.txt	All required Python packages
-README.md	This file!
