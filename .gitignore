@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.env
+.vscode/
+chunks.jsonl
+chroma_db/
+*.db
+*.pdf
+*.ipynb_checkpoints/

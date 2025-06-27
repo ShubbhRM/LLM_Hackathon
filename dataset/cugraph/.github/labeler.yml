@@ -1,0 +1,26 @@
+# https://github.com/actions/labeler#common-examples
+# Adapted from https://github.com/rapidsai/cugraph/blob/main/.github/CODEOWNERS
+# Labels culled from https://github.com/rapidsai/cugraph/labels
+
+python:
+  - 'python/**'
+  - 'notebooks/**'
+
+benchmarks:
+  - 'benchmarks/**'
+
+datasets:
+  - 'datasets/**'
+
+cuGraph:
+  - 'cpp/**'
+
+CMake:
+  - '**/CMakeLists.txt'
+  - '**/cmake/**'
+
+ci:
+   - 'ci/**'
+
+conda:
+  - 'conda/**'

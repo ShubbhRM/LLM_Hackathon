@@ -1,0 +1,112 @@
+---
+# Copyright (c) 2023-2025, NVIDIA CORPORATION.
+
+repos:
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v5.0.0
+      hooks:
+          - id: trailing-whitespace
+          - id: end-of-file-fixer
+    - repo: https://github.com/psf/black
+      rev: 22.10.0
+      hooks:
+          - id: black
+            files: python/.*
+            args: [--config, python/cuml/pyproject.toml]
+    - repo: https://github.com/pycqa/isort
+      rev: 5.13.2
+      hooks:
+          - id: isort
+            files: python/.*
+            args: ["--settings-path", "python/cuml/pyproject.toml"]
+            exclude: ^python/.*/_thirdparty/
+    - repo: https://github.com/PyCQA/flake8
+      rev: 7.1.1
+      hooks:
+          - id: flake8
+            args: [--config=python/cuml/.flake8]
+            files: python/.*$
+            types: [file]
+            types_or: [python, cython]
+            exclude: thirdparty
+            additional_dependencies: [flake8-force]
+    - repo: https://github.com/MarcoGorelli/cython-lint
+      rev: v0.15.0
+      hooks:
+          - id: cython-lint
+    - repo: https://github.com/pre-commit/mirrors-clang-format
+      rev: v20.1.4
+      hooks:
+          - id: clang-format
+            types_or: [c, c++, cuda]
+            args: ["-fallback-style=none", "-style=file", "-i"]
+    - repo: https://github.com/codespell-project/codespell
+      rev: v2.2.2
+      hooks:
+          - id: codespell
+            additional_dependencies: [tomli]
+            args: ["--toml", "pyproject.toml"]
+            exclude: (?x)^(.*stemmer.*|.*stop_words.*|^CHANGELOG.md$)
+    - repo: local
+      hooks:
+          - id: no-deprecationwarning
+            name: no-deprecationwarning
+            description: 'Enforce that DeprecationWarning is not introduced (use FutureWarning instead)'
+            entry: '(category=|\s)DeprecationWarning[,)]'
+            language: pygrep
+            types_or: [python, cython]
+          - id: include-check
+            name: include-check
+            entry: python cpp/scripts/include_checker.py
+            args:
+                - cpp/bench
+                - cpp/comms/mpi/include
+                - cpp/comms/mpi/src
+                - cpp/comms/std/include
+                - cpp/comms/std/src
+                - cpp/include
+                - cpp/examples
+                - cpp/src
+                - cpp/src_prims
+                - cpp/test
+            pass_filenames: false
+            language: python
+          - id: xfail-format
+            name: Format xfail lists
+            description: 'Ensure xfail lists are properly formatted according to standards'
+            entry: python python/cuml/cuml/accel/tests/xfail_manager.py
+            language: python
+            files: '.*xfail.*\.yaml$'
+            args: ['format', '--cleanup']
+            additional_dependencies: ['pyyaml>=6.0', 'packaging>=21.0']
+    - repo: https://github.com/rapidsai/pre-commit-hooks
+      rev: v0.6.0
+      hooks:
+        - id: verify-copyright
+          files: |
+            (?x)
+                [.](cmake|cpp|cu|cuh|h|hpp|sh|pxd|py|pyx)$|
+                CMakeLists[.]txt$|
+                CMakeLists_standalone[.]txt$|
+                [.]flake8[.]cython$|
+                meta[.]yaml$
+          exclude: |
+            (?x)
+                cpp/src/tsne/cannylab/bh[.]cu$|
+                python/cuml/cuml/_thirdparty
+        - id: verify-alpha-spec
+        - id: verify-codeowners
+          args: [--fix, --project-prefix=cuml]
+    - repo: https://github.com/rapidsai/dependency-file-generator
+      rev: v1.19.0
+      hooks:
+          - id: rapids-dependency-file-generator
+            args: ["--clean"]
+    - repo: https://github.com/shellcheck-py/shellcheck-py
+      rev: v0.10.0.1
+      hooks:
+        - id: shellcheck
+          args: ["--severity=warning"]
+
+default_language_version:
+    python: python3

@@ -1,0 +1,12 @@
+# https://github.com/actions/labeler#common-examples
+# Adapted from https://github.com/rapidsai/nx-cugraph/blob/main/.github/CODEOWNERS
+# Labels culled from https://github.com/rapidsai/nx-cugraph/labels
+
+benchmarks:
+  - 'benchmarks/**'
+
+ci:
+   - 'ci/**'
+
+conda:
+  - 'conda/**'

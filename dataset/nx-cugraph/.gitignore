@@ -1,0 +1,78 @@
+## Common
+__pycache__
+*.pyc
+*.a
+*.o
+*.so
+*.dylib
+.cache
+.coverage
+.vscode
+.lock
+*.swp
+*.pytest_cache
+*~
+DartConfiguration.tcl
+.DS_Store
+rmm_log.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+junit-cugraph.xml
+*.cover
+.hypothesis/
+test-results
+
+## Python build directories & artifacts
+dask-worker-space/
+htmlcov
+dist/
+*.egg-info/
+python/build
+wheels/
+wheelhouse/
+_skbuild/
+cufile.log
+
+## Patching
+*.diff
+*.orig
+*.rej
+
+## C++ build directories & artifacts
+CMakeFiles/
+Debug
+build/
+
+## Eclipse IDE
+.project
+.cproject
+.settings
+
+## IntelliJ IDE
+.idea/
+.idea_modules/
+*.iml
+*.ipr
+*.iws
+
+## Datasets
+datasets/*
+
+# nx-cugraph side effects
+objects.inv
+
+.pydevproject
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+
+# clang tooling
+compile_commands.json
+.clangd/

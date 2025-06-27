@@ -1,0 +1,220 @@
+# Dependency list for https://github.com/rapidsai/dependency-file-generator
+files:
+  all:
+    output: [conda]
+    matrix:
+      cuda: ["12.8"]
+      arch: [x86_64, aarch64]
+    includes:
+      - checks
+      - cuda_version
+      - python_build_rapids
+      - python_build_wheel
+      - test_python_common
+      - python_run_nx_cugraph
+      - depends_on_pylibcugraph
+      - test_python_nx_cugraph
+      - depends_on_cupy
+      - depends_on_cudf
+  checks:
+    output: none
+    includes:
+      - checks
+      - py_version
+  test_notebooks:
+    output: none
+    includes:
+      - cuda_version
+      - py_version
+      - test_notebook
+  test_python:
+    output: none
+    includes:
+      - cuda_version
+      - depends_on_cudf
+      - py_version
+      - test_python_common
+      - test_python_nx_cugraph
+      - depends_on_nx_cugraph
+  py_build_nx_cugraph:
+    output: pyproject
+    pyproject_dir: .
+    extras:
+      table: build-system
+    includes:
+      - python_build_rapids
+      - python_build_wheel
+  py_run_nx_cugraph:
+    output: pyproject
+    pyproject_dir: .
+    extras:
+      table: project
+    includes:
+      - depends_on_pylibcugraph
+      - depends_on_cupy
+      - python_run_nx_cugraph
+  py_test_nx_cugraph:
+    output: pyproject
+    pyproject_dir: .
+    extras:
+      table: project.optional-dependencies
+      key: test
+    includes:
+      - depends_on_cudf
+      - test_python_common
+      - test_python_nx_cugraph
+
+channels:
+  - rapidsai
+  - rapidsai-nightly
+  - conda-forge
+  - nvidia
+dependencies:
+  checks:
+    common:
+      - output_types: [conda, requirements]
+        packages:
+          - pre-commit
+  cuda_version:
+    specific:
+      - output_types: conda
+        matrices:
+          - matrix:
+              cuda: "12.0"
+            packages:
+              - cuda-version=12.0
+          - matrix:
+              cuda: "12.2"
+            packages:
+              - cuda-version=12.2
+          - matrix:
+              cuda: "12.5"
+            packages:
+              - cuda-version=12.5
+          - matrix:
+              cuda: "12.8"
+            packages:
+              - cuda-version=12.8
+          - matrix:
+              cuda: "12.9"
+            packages:
+              - cuda-version=12.9
+  depends_on_nx_cugraph:
+    common:
+      - output_types: conda
+        packages:
+          - nx-cugraph==25.8.*,>=0.0.0a0
+  py_version:
+    specific:
+      - output_types: [conda]
+        matrices:
+          - matrix:
+              py: "3.10"
+            packages:
+              - python=3.10
+          - matrix:
+              py: "3.11"
+            packages:
+              - python=3.11
+          - matrix:
+              py: "3.12"
+            packages:
+              - python=3.12
+          - matrix:
+              py: "3.13"
+            packages:
+              - python=3.13
+          - matrix:
+            packages:
+              - python>=3.10,<3.14
+  python_build_rapids:
+    common:
+      - output_types: [conda, pyproject, requirements]
+        packages:
+          - rapids-build-backend>=0.3.1,<0.4.0.dev0
+  python_build_wheel:
+    common:
+      - output_types: [conda, pyproject, requirements]
+        packages:
+          - setuptools>=61.0.0
+          - wheel
+  test_notebook:
+    common:
+      - output_types: [conda, requirements]
+        packages:
+          - ipython
+          - notebook>=0.5.0
+  test_python_common:
+    common:
+      - output_types: [conda, pyproject, requirements]
+        packages:
+          - pandas
+          - pytest
+          - pytest-benchmark
+          - pytest-cov
+          - pytest-xdist
+          - scipy
+  python_run_nx_cugraph:
+    common:
+      - output_types: [conda, pyproject, requirements]
+        packages:
+          - networkx>=3.2
+          - &numpy numpy>=1.23,<3.0a0
+  test_python_nx_cugraph:
+    common:
+      - output_types: [conda, pyproject, requirements]
+        packages:
+            # not needed by nx-cugraph tests, but is required for running networkx tests
+          - pytest-mpl
+  depends_on_cupy:
+    common:
+      - output_types: conda
+        packages:
+          - cupy>=12.0.0
+    # NOTE: This is intentionally not broken into groups by a 'cuda_suffixed' selector like
+    #       other packages with -cu{nn}x suffixes in this file.
+    #       All RAPIDS wheel builds (including in devcontainers) expect cupy to be suffixed.
+    specific:
+      - output_types: [pyproject, requirements]
+        matrices:
+          - matrix: # All CUDA 12 versions
+            packages:
+              - cupy-cuda12x>=12.0.0
+  depends_on_cudf:
+    common:
+      - output_types: conda
+        packages:
+          - &cudf_unsuffixed cudf==25.8.*,>=0.0.0a0
+      - output_types: requirements
+        packages:
+          # pip recognizes the index as a global option for the requirements.txt file
+          - --extra-index-url=https://pypi.nvidia.com
+          - --extra-index-url=https://pypi.anaconda.org/rapidsai-wheels-nightly/simple
+    specific:
+      - output_types: [pyproject, requirements]
+        matrices:
+          - matrix:
+              cuda: "12.*"
+              cuda_suffixed: "true"
+            packages:
+              - cudf-cu12==25.8.*,>=0.0.0a0
+          - {matrix: null, packages: [*cudf_unsuffixed]}
+  depends_on_pylibcugraph:
+    common:
+      - output_types: conda
+        packages:
+          - &pylibcugraph_unsuffixed pylibcugraph==25.8.*,>=0.0.0a0
+      - output_types: requirements
+        packages:
+          # pip recognizes the index as a global option for the requirements.txt file
+          - --extra-index-url=https://pypi.nvidia.com
+          - --extra-index-url=https://pypi.anaconda.org/rapidsai-wheels-nightly/simple
+    specific:
+      - output_types: [pyproject, requirements]
+        matrices:
+          - matrix:
+              cuda: "12.*"
+              cuda_suffixed: "true"
+            packages:
+              - pylibcugraph-cu12==25.8.*,>=0.0.0a0
+          - {matrix: null, packages: [*pylibcugraph_unsuffixed]}
