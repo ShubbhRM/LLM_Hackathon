@@ -1,0 +1,26 @@
+- id: gen
+  name: "Code Generation"
+  icon: "⚡"
+  tag: "GEN"
+  description: "Generate well-commented ML/data science code using retrieved cuDF context. Prefers GPU-accelerated RAPIDS and PyTorch idioms."
+  example_input: "Write a function to compute rolling mean on a GPU DataFrame"
+  example_output: "import cudf\ndef rolling_gpu_mean(df, col, window):\n    return df[col].rolling(window=window).mean()"
+  prompt_excerpt: "Use ONLY retrieved context. Prefer cuDF over pandas, PyTorch .cuda() over CPU ops. Generate well-commented, production-ready code."
+
+- id: correct
+  name: "Bug Hints"
+  icon: "🔍"
+  tag: "DEBUG"
+  description: "Identify bugs and inefficiencies in your code. Returns hints and guidance — not full solutions — to help you learn and fix issues yourself."
+  example_input: "Why is my cuDF groupby slower than pandas?"
+  example_output: "HINT: Check if you're calling .to_pandas() before groupby — this copies data back to CPU, negating GPU benefits."
+  prompt_excerpt: "Give ONLY hints and pointers — do NOT write the solution. Identify type errors, CPU↔GPU data copies, inefficient loops."
+
+- id: gpu
+  name: "GPU Optimisation"
+  icon: "🚀"
+  tag: "CUDA"
+  description: "Suggest GPU rewrites for CPU-bound code. Maps pandas → cuDF, NumPy → CuPy, and explains complexity improvements with CUDA thread-level reasoning."
+  example_input: "Optimise this pandas merge for large datasets"
+  example_output: "# GPU (fast): cuDF merge\ngdf1.merge(gdf2, on='id')  # GPU-parallel hash join"
+  prompt_excerpt: "Rewrite CPU code using cuDF, CuPy, or PyTorch CUDA. Explain speedup in terms of warp parallelism and memory bandwidth."

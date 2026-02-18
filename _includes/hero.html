@@ -1,0 +1,66 @@
+<section class="hero" id="hero" aria-label="Hero">
+  <!-- Particle canvas -->
+  <canvas id="gpu-canvas" aria-hidden="true"></canvas>
+
+  <!-- Warp scan sweep -->
+  <div class="warp-scan" aria-hidden="true"></div>
+
+  <div class="hero-content">
+    <p class="hero-eyebrow">
+      <span class="eyebrow-tag">HACKATHON PROJECT</span>
+      <span class="eyebrow-sep">·</span>
+      <span class="eyebrow-tag">LOCAL LLM</span>
+      <span class="eyebrow-sep">·</span>
+      <span class="eyebrow-tag">RAG SYSTEM</span>
+    </p>
+
+    <h1 class="hero-title" id="hero-title" aria-label="Local RAG Code Tutor"></h1>
+
+    <p class="hero-subtitle" id="hero-subtitle"></p>
+
+    <!-- Stats HUD strip -->
+    <div class="hero-hud" role="list" aria-label="Key statistics">
+      <div class="hud-item" role="listitem">
+        <span class="hud-val" id="stat-files">0</span>
+        <span class="hud-unit">Files</span>
+        <span class="hud-lbl">Indexed</span>
+      </div>
+      <div class="hud-divider" aria-hidden="true"></div>
+      <div class="hud-item" role="listitem">
+        <span class="hud-val"><span id="stat-offline">0</span>%</span>
+        <span class="hud-unit">Cloud</span>
+        <span class="hud-lbl">Dependency</span>
+      </div>
+      <div class="hud-divider" aria-hidden="true"></div>
+      <div class="hud-item" role="listitem">
+        <span class="hud-val"><span id="stat-params">0</span>B</span>
+        <span class="hud-unit">Parameters</span>
+        <span class="hud-lbl">Qwen2.5-Coder</span>
+      </div>
+      <div class="hud-divider" aria-hidden="true"></div>
+      <div class="hud-item" role="listitem">
+        <span class="hud-val">&lt;<span id="stat-latency">0</span>s</span>
+        <span class="hud-unit">Retrieval</span>
+        <span class="hud-lbl">Latency</span>
+      </div>
+      <div class="hud-divider" aria-hidden="true"></div>
+      <div class="hud-item" role="listitem">
+        <span class="hud-val">3</span>
+        <span class="hud-unit">Task</span>
+        <span class="hud-lbl">Modes</span>
+      </div>
+    </div>
+
+    <!-- CTAs -->
+    <div class="hero-cta">
+      <a href="#architecture" class="btn btn-primary">Explore Architecture</a>
+      <a href="https://github.com/ShubbhRM/LLM_Hackathon" class="btn btn-ghost" target="_blank" rel="noopener">View on GitHub ↗</a>
+    </div>
+  </div>
+
+  <!-- Scroll indicator -->
+  <div class="scroll-indicator" aria-hidden="true">
+    <span class="scroll-label">scroll</span>
+    <span class="scroll-arrow"></span>
+  </div>
+</section>

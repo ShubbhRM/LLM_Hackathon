@@ -1,0 +1,25 @@
+title: "LLM Hackathon — Local RAG Code Tutor"
+description: "Fully offline RAG system powered by Qwen2.5-Coder-14B. Indexes 8,528 cuDF files into ChromaDB to answer GPU/ML code questions locally."
+author: ShubbhRM
+baseurl: "/LLM_Hackathon"
+url: "https://ShubbhRM.github.io"
+
+github_username: ShubbhRM
+repo_name: LLM_Hackathon
+
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - vendor/
+  - .bundle/
+  - node_modules/
+  - dataset/
+  - "*.py"
+  - "*.jsonl"
+  - chroma_db/
+  - requirements.txt
+  - readme.md

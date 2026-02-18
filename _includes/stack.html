@@ -1,0 +1,22 @@
+<section class="section" id="stack" aria-label="Technology stack">
+  <div class="container">
+    <h2 class="section-title">Technology Stack</h2>
+    <p class="section-desc">
+      Carefully chosen tools — all open-source, all running locally
+    </p>
+
+    <div class="tech-grid">
+      {% for item in site.data.stack %}
+      <div class="tech-card">
+        <div class="tech-card-top">
+          <span class="tech-icon">{{ item.icon }}</span>
+          <span class="tech-tag tech-tag--{{ item.tag | downcase | replace: ' ', '-' }}">{{ item.tag }}</span>
+        </div>
+        <div class="tech-name">{{ item.name }}</div>
+        <div class="tech-desc">{{ item.desc }}</div>
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</section>

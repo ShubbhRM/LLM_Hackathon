@@ -1,0 +1,81 @@
+<section class="section" id="pipeline" aria-label="Data pipeline">
+  <div class="container">
+    <h2 class="section-title">Data Ingestion Pipeline</h2>
+    <p class="section-desc">
+      From raw source files to a queryable vector index — fully automated
+    </p>
+
+    <!-- File-type chunking rules -->
+    <div class="chunk-types">
+      <div class="chunk-type">
+        <div class="chunk-ext">.ipynb</div>
+        <div class="chunk-rule">One chunk per notebook cell, tagged by type (code / markdown)</div>
+        <div class="chunk-lib">nbformat</div>
+      </div>
+      <div class="chunk-type chunk-type--highlight">
+        <div class="chunk-ext">.py</div>
+        <div class="chunk-rule">Split on <code>def </code> / <code>class </code> boundaries via regex. Tagged: function / class / top-level</div>
+        <div class="chunk-lib">regex</div>
+      </div>
+      <div class="chunk-type">
+        <div class="chunk-ext">.md</div>
+        <div class="chunk-rule">Split on blank lines or <code>#</code> heading markers. Tagged: markdown</div>
+        <div class="chunk-lib">splitlines</div>
+      </div>
+      <div class="chunk-type">
+        <div class="chunk-ext">.pdf</div>
+        <div class="chunk-rule">Page extraction then blank-line splitting. Tagged: pdf</div>
+        <div class="chunk-lib">PyPDF2</div>
+      </div>
+    </div>
+
+    <!-- Pipeline flow steps -->
+    <div class="pipeline-steps">
+      {% for step in site.data.pipeline %}
+      <div class="pipeline-step" data-step="{{ step.step }}">
+        <div class="ps-num">{{ step.step | prepend: '0' | slice: -2, 2 }}</div>
+        <div class="ps-icon">{{ step.icon }}</div>
+        <div class="ps-body">
+          <div class="ps-name">{{ step.name }}</div>
+          <div class="ps-script"><code>{{ step.script }}</code></div>
+          <div class="ps-desc">{{ step.description }}</div>
+          <div class="ps-flow">
+            <span class="ps-input">{{ step.input }}</span>
+            <span class="ps-arrow">→</span>
+            <span class="ps-output">{{ step.output }}</span>
+          </div>
+          <div class="ps-tech">
+            {% for t in step.tech %}
+            <span class="ps-pill">{{ t }}</span>
+            {% endfor %}
+          </div>
+        </div>
+        {% unless forloop.last %}
+        <div class="ps-connector" aria-hidden="true"></div>
+        {% endunless %}
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Summary stats -->
+    <div class="pipeline-stats">
+      <div class="pstat">
+        <div class="pstat-val">8,528</div>
+        <div class="pstat-lbl">Source Files</div>
+      </div>
+      <div class="pstat">
+        <div class="pstat-val">128</div>
+        <div class="pstat-lbl">Embed Batch Size</div>
+      </div>
+      <div class="pstat">
+        <div class="pstat-val">384</div>
+        <div class="pstat-lbl">Embedding Dims</div>
+      </div>
+      <div class="pstat">
+        <div class="pstat-val">all-MiniLM-L6-v2</div>
+        <div class="pstat-lbl">Encoder Model</div>
+      </div>
+    </div>
+
+  </div>
+</section>

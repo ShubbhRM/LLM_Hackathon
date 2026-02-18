@@ -1,0 +1,47 @@
+- name: "Qwen2.5-Coder-14B"
+  icon: "🧠"
+  desc: "State-of-the-art 14B parameter code LLM, runs locally via LM Studio. Zero cloud dependency."
+  tag: "LLM"
+  category: core
+
+- name: "ChromaDB"
+  icon: "🗄️"
+  desc: "Persistent vector database storing dense embeddings of 8,528 cuDF source files."
+  tag: "Vector DB"
+  category: core
+
+- name: "SentenceTransformers"
+  icon: "📐"
+  desc: "all-MiniLM-L6-v2 encodes queries and document chunks into 384-dim embedding space."
+  tag: "Embeddings"
+  category: core
+
+- name: "RAPIDS cuDF"
+  icon: "⚡"
+  desc: "GPU-accelerated DataFrame library — the entire source repo forms the RAG knowledge base."
+  tag: "GPU"
+  category: knowledge
+
+- name: "LM Studio"
+  icon: "🖥️"
+  desc: "OpenAI-compatible local inference server. Runs Qwen2.5-Coder at localhost:1234."
+  tag: "Inference"
+  category: infra
+
+- name: "Streamlit"
+  icon: "🎛️"
+  desc: "Interactive web UI with mode selector, chunk-count slider, and source citations."
+  tag: "UI"
+  category: infra
+
+- name: "PyTorch"
+  icon: "🔥"
+  desc: "Deep learning backbone for embedding computation and GPU tensor operations."
+  tag: "ML"
+  category: core
+
+- name: "OpenAI SDK (v0.x)"
+  icon: "🔌"
+  desc: "Legacy openai library used to speak the OpenAI protocol with LM Studio's local server."
+  tag: "API"
+  category: infra

@@ -1,0 +1,44 @@
+- step: 1
+  name: "Ingest & Chunk"
+  script: "auto_chunker.py"
+  icon: "📂"
+  description: "Walks dataset/ and splits every file by type. Notebooks → cells. Python → function/class boundaries. Markdown → headings. PDFs → paragraphs."
+  input: "dataset/ (8,528 files)"
+  output: "chunks.jsonl"
+  tech: ["nbformat", "regex", "PyPDF2"]
+
+- step: 2
+  name: "Embed & Index"
+  script: "build_index.py"
+  icon: "🧬"
+  description: "Loads chunks.jsonl, encodes every chunk with all-MiniLM-L6-v2, L2-normalises embeddings, then upserts into ChromaDB in batches of 128."
+  input: "chunks.jsonl"
+  output: "chroma_db/ (persistent)"
+  tech: ["SentenceTransformers", "ChromaDB", "tqdm"]
+
+- step: 3
+  name: "Query & Retrieve"
+  script: "rag_utils.py"
+  icon: "🔎"
+  description: "Encodes the user query, performs cosine similarity search in ChromaDB, returns top-K chunks (default 4) with source file metadata."
+  input: "User query string"
+  output: "Context + metadata list"
+  tech: ["ChromaDB", "cosine similarity"]
+
+- step: 4
+  name: "Build Prompt"
+  script: "prompt_templates.py"
+  icon: "📝"
+  description: "Selects one of three task-specific prompt templates (Gen / Debug / GPU) and injects the retrieved context as grounding evidence."
+  input: "Context + mode selection"
+  output: "Full prompt string"
+  tech: ["f-strings", "Jinja-like templates"]
+
+- step: 5
+  name: "LLM Inference"
+  script: "llm_utils.py"
+  icon: "⚡"
+  description: "Sends the prompt to Qwen2.5-Coder-14B via LM Studio's OpenAI-compatible endpoint at localhost:1234. Returns streamed completion."
+  input: "Full prompt string"
+  output: "Generated code / hints"
+  tech: ["openai<1.0", "LM Studio", "Qwen2.5-Coder-14B"]

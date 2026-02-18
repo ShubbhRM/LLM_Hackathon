@@ -1,0 +1,909 @@
+/* ============================================================
+   LLM HACKATHON — GPU / CUDA Dark Design
+   Palette: NVIDIA Green #76b900 · Near-Black #080809
+   ============================================================ */
+
+:root {
+  /* Backgrounds */
+  --bg-deep:      #080809;
+  --bg-panel:     #0e0f10;
+  --bg-card:      #131415;
+  --bg-elevated:  #181a1b;
+  --bg-hover:     #1e2021;
+
+  /* NVIDIA Green */
+  --gpu-green:    #76b900;
+  --gpu-bright:   #9ecf00;
+  --gpu-dim:      #4d7a00;
+  --gpu-glow:     rgba(118,185,0,0.22);
+  --gpu-bg:       rgba(118,185,0,0.07);
+
+  /* Text */
+  --white-bright: #f0f4f8;
+  --white-main:   #e2e8f0;
+  --white-dim:    #94a3b8;
+  --white-muted:  #475569;
+  --white-ghost:  #1e2535;
+
+  /* Accent data colours */
+  --data-amber:   #f59e0b;
+  --data-blue:    #38bdf8;
+  --data-purple:  #a78bfa;
+
+  /* Typography */
+  --font-body:    'Inter', 'Helvetica Neue', sans-serif;
+  --font-code:    'JetBrains Mono', 'Courier New', monospace;
+
+  /* Effects */
+  --glow-green:   0 0 12px rgba(118,185,0,0.55), 0 0 30px rgba(118,185,0,0.2);
+  --glow-sm:      0 0 6px rgba(118,185,0,0.4);
+  --border-subtle: 1px solid rgba(255,255,255,0.05);
+  --border-green:  1px solid rgba(118,185,0,0.25);
+  --border-panel:  1px solid rgba(255,255,255,0.07);
+
+  --section-pad:   6rem 0;
+}
+
+/* --- Reset --- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 18px; }
+
+body {
+  background: var(--bg-deep);
+  color: var(--white-main);
+  font-family: var(--font-body);
+  line-height: 1.65;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* GPU die grid overlay — the silicon wafer effect */
+.gpu-grid-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(118,185,0,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(118,185,0,0.025) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+/* --- Keyframes --- */
+@keyframes blink        { 0%,100%{opacity:1} 50%{opacity:0} }
+@keyframes fade-up      { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+@keyframes warp-sweep   { 0%{transform:translateX(-100%)} 100%{transform:translateX(110vw)} }
+@keyframes pulse-glow   { 0%,100%{box-shadow:var(--glow-sm)} 50%{box-shadow:var(--glow-green)} }
+@keyframes bounce-down  { 0%,100%{transform:translateY(0) rotate(45deg)} 50%{transform:translateY(5px) rotate(45deg)} }
+@keyframes dot-travel   { 0%{left:0%;opacity:0} 10%{opacity:1} 90%{opacity:1} 100%{left:100%;opacity:0} }
+@keyframes stage-in     { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+@keyframes shimmer-bar  { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+
+/* --- Utility --- */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2.5rem;
+  position: relative; z-index: 1;
+}
+
+.section {
+  padding: var(--section-pad);
+  border-bottom: var(--border-subtle);
+  position: relative;
+}
+.section--last { border-bottom: none; }
+
+.section-title {
+  font-family: var(--font-body);
+  font-size: 2rem;
+  font-weight: 300;
+  color: var(--white-bright);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+.section-title::after {
+  content: '';
+  display: block;
+  width: 36px; height: 2px;
+  background: var(--gpu-green);
+  box-shadow: var(--glow-sm);
+  margin: 0.75rem auto 0;
+}
+
+.section-desc {
+  text-align: center;
+  color: var(--white-dim);
+  font-size: 1rem;
+  margin-bottom: 3.5rem;
+  letter-spacing: 0.02em;
+}
+
+.green  { color: var(--gpu-green); }
+.dim    { color: var(--white-dim); }
+.mono   { font-family: var(--font-code); }
+
+.cursor {
+  display: inline-block; width: 2px; height: 1.1em;
+  background: var(--gpu-green); animation: blink 1s step-end infinite;
+  vertical-align: text-bottom; margin-left: 3px;
+  box-shadow: var(--glow-sm);
+}
+
+/* ============================================================
+   NAVIGATION — CUDA / toolkit style
+   ============================================================ */
+.gpu-nav {
+  position: sticky; top: 0; z-index: 1000;
+  background: rgba(8,8,9,0.96);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(118,185,0,0.12);
+  height: 64px;
+}
+.nav-inner {
+  max-width: 1200px; margin: 0 auto;
+  padding: 0 2.5rem;
+  height: 100%;
+  display: flex; justify-content: space-between; align-items: center;
+}
+
+/* Brand: pixel-chip logo */
+.nav-brand {
+  display: flex; align-items: center; gap: 0.6rem;
+  text-decoration: none;
+}
+.brand-chip {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 2px; width: 20px; height: 20px;
+}
+.chip-block {
+  background: var(--gpu-green);
+  border-radius: 1px;
+  box-shadow: 0 0 4px rgba(118,185,0,0.5);
+}
+.brand-text {
+  font-family: var(--font-code);
+  font-size: 0.9rem; font-weight: 600;
+  color: var(--white-bright);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.brand-accent { color: var(--gpu-green); }
+
+.nav-links { display: flex; align-items: center; gap: 0; }
+.nav-link {
+  color: var(--white-muted);
+  text-decoration: none;
+  font-size: 0.78rem; font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0 1rem;
+  height: 64px; display: flex; align-items: center;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+}
+.nav-link:hover, .nav-link.active {
+  color: var(--white-bright);
+  border-bottom-color: var(--gpu-green);
+}
+.nav-github {
+  color: var(--gpu-green) !important;
+  border: var(--border-green) !important;
+  margin-left: 1rem; padding: 0.4rem 1rem !important;
+  height: auto !important; border-radius: 2px;
+  font-size: 0.75rem !important;
+  border-bottom: var(--border-green) !important;
+  transition: background 0.2s, box-shadow 0.2s !important;
+}
+.nav-github:hover { background: var(--gpu-bg) !important; box-shadow: var(--glow-sm) !important; }
+
+.nav-toggle {
+  display: none; flex-direction: column; gap: 5px;
+  background: none; border: none; cursor: pointer; padding: 4px;
+}
+.nav-toggle span { display: block; width: 22px; height: 1.5px; background: var(--white-main); }
+
+/* ============================================================
+   HERO — GPU Cluster / HPC Console
+   ============================================================ */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  padding: 5rem 5% 4rem;
+  position: relative; overflow: hidden;
+  text-align: center;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 100%, rgba(118,185,0,0.06) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 35% at 50% 0%, rgba(10,12,10,0.7) 0%, transparent 70%),
+    var(--bg-deep);
+}
+
+/* Warp scan sweep */
+.warp-scan {
+  position: absolute; top: 0; left: 0;
+  width: 280px; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(118,185,0,0.04), rgba(118,185,0,0.06), rgba(118,185,0,0.04), transparent);
+  animation: warp-sweep 7s linear infinite;
+  pointer-events: none; z-index: 0;
+}
+
+/* Particle canvas */
+#gpu-canvas {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0; opacity: 0.6;
+}
+
+.hero-content {
+  position: relative; z-index: 1;
+  max-width: 860px; width: 100%;
+  display: flex; flex-direction: column; align-items: center;
+  animation: fade-up 0.9s ease both;
+}
+
+.hero-eyebrow {
+  display: flex; align-items: center; gap: 0.6rem;
+  flex-wrap: wrap; justify-content: center;
+  margin-bottom: 1.5rem;
+}
+.eyebrow-tag {
+  font-family: var(--font-code);
+  font-size: 0.68rem; letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gpu-green);
+  border: 1px solid rgba(118,185,0,0.3);
+  padding: 0.2rem 0.5rem; border-radius: 2px;
+  background: rgba(118,185,0,0.05);
+}
+.eyebrow-sep { color: var(--white-muted); font-size: 0.7rem; }
+
+.hero-title {
+  font-size: clamp(2.4rem, 6vw, 4.6rem);
+  font-weight: 200;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--white-bright);
+  margin-bottom: 1.25rem;
+  min-height: 2.4em;
+  line-height: 1.15;
+  font-family: var(--font-body);
+}
+.hero-title .green-word { color: var(--gpu-green); font-weight: 500; }
+
+.hero-subtitle {
+  color: var(--white-dim);
+  font-size: 1rem;
+  font-family: var(--font-code);
+  letter-spacing: 0.04em;
+  max-width: 620px;
+  margin-bottom: 3rem;
+  min-height: 1.4em;
+}
+
+/* HUD strip */
+.hero-hud {
+  display: flex; align-items: stretch;
+  border: var(--border-green);
+  background: rgba(8,8,9,0.8);
+  backdrop-filter: blur(10px);
+  margin-bottom: 2.5rem;
+  overflow: hidden;
+}
+.hud-item {
+  padding: 1rem 1.5rem;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 0.15rem;
+}
+.hud-divider {
+  width: 1px;
+  background: rgba(118,185,0,0.15);
+  align-self: stretch;
+}
+.hud-val {
+  font-family: var(--font-code);
+  font-size: 1.55rem; font-weight: 300;
+  color: var(--gpu-green); line-height: 1;
+  letter-spacing: -0.01em;
+}
+.hud-unit {
+  font-size: 0.6rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--white-dim);
+}
+.hud-lbl {
+  font-size: 0.58rem; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--white-muted);
+}
+
+/* Buttons */
+.hero-cta {
+  display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
+}
+.btn {
+  font-family: var(--font-body);
+  font-size: 0.78rem; font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 0.85rem 2.2rem; text-decoration: none;
+  border-radius: 2px; display: inline-block;
+  transition: all 0.22s; border: 1px solid transparent;
+  cursor: pointer;
+}
+.btn-primary {
+  background: var(--gpu-green);
+  color: #000; font-weight: 600;
+  border-color: var(--gpu-green);
+  box-shadow: var(--glow-sm);
+}
+.btn-primary:hover { background: var(--gpu-bright); box-shadow: var(--glow-green); }
+.btn-ghost {
+  background: transparent;
+  color: var(--white-dim);
+  border-color: rgba(255,255,255,0.15);
+}
+.btn-ghost:hover { border-color: rgba(255,255,255,0.4); color: var(--white-bright); }
+
+.scroll-indicator {
+  position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  color: var(--white-muted); font-size: 0.6rem; letter-spacing: 0.15em;
+  text-transform: uppercase; z-index: 1;
+}
+.scroll-arrow {
+  width: 9px; height: 9px;
+  border-right: 1.5px solid var(--white-muted);
+  border-bottom: 1.5px solid var(--white-muted);
+  animation: bounce-down 1.6s ease infinite;
+}
+.scroll-label { font-family: var(--font-code); }
+
+/* ============================================================
+   ARCHITECTURE — Animated RAG Pipeline
+   ============================================================ */
+.rag-pipeline {
+  display: flex; align-items: center;
+  justify-content: center;
+  flex-wrap: nowrap; gap: 0;
+  margin-bottom: 3.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.arch-stage {
+  background: var(--bg-panel);
+  border: var(--border-panel);
+  padding: 1.5rem 1.1rem;
+  text-align: center;
+  min-width: 150px; flex: 1;
+  position: relative;
+  opacity: 0; transform: translateY(12px);
+  transition: background 0.2s, border-color 0.2s;
+}
+.arch-stage.stage-active {
+  animation: stage-in 0.4s ease forwards;
+}
+.arch-stage:hover {
+  background: var(--bg-card);
+  border-color: rgba(118,185,0,0.2);
+}
+.arch-stage::after {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: transparent;
+  transition: background 0.3s;
+}
+.arch-stage.stage-active::after { background: var(--gpu-green); box-shadow: var(--glow-sm); }
+.arch-stage--final.stage-active::after { box-shadow: var(--glow-green); }
+
+.stage-icon  { font-size: 1.6rem; margin-bottom: 0.5rem; display: block; }
+.stage-name  {
+  font-family: var(--font-code);
+  font-size: 0.75rem; font-weight: 600;
+  color: var(--white-bright); letter-spacing: 0.12em;
+  text-transform: uppercase; margin-bottom: 0.6rem;
+}
+.stage-detail {
+  font-size: 0.72rem; color: var(--white-muted);
+  line-height: 1.6; margin-bottom: 0.75rem;
+}
+.stage-badge {
+  font-family: var(--font-code);
+  font-size: 0.6rem; color: var(--gpu-green);
+  background: var(--gpu-bg); border: var(--border-green);
+  padding: 0.2rem 0.45rem; border-radius: 2px;
+  letter-spacing: 0.05em; display: inline-block;
+}
+
+/* Connector with travelling dot */
+.arch-connector {
+  flex-shrink: 0; width: 40px;
+  position: relative; height: 2px;
+  align-self: center;
+}
+.connector-line {
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: rgba(118,185,0,0.2);
+}
+.connector-dot {
+  position: absolute; top: 50%;
+  width: 7px; height: 7px;
+  background: var(--gpu-green);
+  border-radius: 50%;
+  transform: translateY(-50%);
+  box-shadow: 0 0 6px rgba(118,185,0,0.8);
+  animation: dot-travel 2.4s linear infinite;
+  left: 0%;
+}
+
+/* Callouts row */
+.arch-callouts {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1px; background: var(--white-ghost);
+  border: var(--border-subtle);
+}
+.callout {
+  background: var(--bg-panel);
+  padding: 1.5rem;
+  display: flex; gap: 1rem; align-items: flex-start;
+  transition: background 0.2s;
+}
+.callout:hover { background: var(--bg-card); }
+.callout-icon { font-size: 1.4rem; flex-shrink: 0; }
+.callout-title {
+  font-size: 0.88rem; font-weight: 500;
+  color: var(--white-bright); margin-bottom: 0.3rem;
+}
+.callout-desc {
+  font-size: 0.78rem; color: var(--white-muted); line-height: 1.6;
+}
+
+/* ============================================================
+   MODES — Three specialised task cards
+   ============================================================ */
+.modes-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.mode-card {
+  background: var(--bg-panel);
+  border: var(--border-panel);
+  border-radius: 2px;
+  padding: 1.75rem;
+  cursor: pointer;
+  transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
+  position: relative; overflow: hidden;
+}
+.mode-card::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: transparent; transition: background 0.3s;
+}
+.mode-card--active {
+  border-color: rgba(118,185,0,0.35);
+  background: var(--bg-card);
+  box-shadow: var(--glow-sm);
+}
+.mode-card--active::before { background: var(--gpu-green); }
+.mode-card:hover:not(.mode-card--active) {
+  border-color: rgba(118,185,0,0.15);
+  background: var(--bg-elevated);
+}
+
+.mode-header {
+  display: flex; align-items: center; gap: 0.85rem;
+  margin-bottom: 0.85rem;
+}
+.mode-icon { font-size: 1.5rem; flex-shrink: 0; }
+.mode-name {
+  font-size: 1.05rem; font-weight: 500;
+  color: var(--white-bright); letter-spacing: 0.04em;
+}
+.mode-tag {
+  font-family: var(--font-code);
+  font-size: 0.58rem; letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gpu-green); background: var(--gpu-bg);
+  border: var(--border-green);
+  padding: 0.15rem 0.4rem; border-radius: 1px;
+  margin-left: auto; flex-shrink: 0;
+}
+
+.mode-desc {
+  font-size: 0.85rem; color: var(--white-dim);
+  line-height: 1.65; margin-bottom: 1.25rem;
+}
+
+.mode-body { display: none; }
+.mode-card--active .mode-body { display: block; }
+
+.mode-prompt-label {
+  font-family: var(--font-code);
+  font-size: 0.6rem; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--gpu-green);
+  margin-bottom: 0.5rem;
+}
+.mode-prompt {
+  background: var(--bg-deep);
+  border: var(--border-subtle);
+  border-left: 2px solid var(--gpu-green);
+  padding: 0.85rem 1rem;
+  border-radius: 2px; margin-bottom: 1.25rem;
+  overflow-x: auto;
+}
+.mode-prompt code {
+  font-family: var(--font-code);
+  font-size: 0.72rem; color: var(--white-dim);
+  line-height: 1.65; white-space: pre-wrap;
+}
+
+.mode-example { display: flex; flex-direction: column; gap: 0.75rem; }
+.example-row { display: flex; flex-direction: column; gap: 0.3rem; }
+.example-label {
+  font-family: var(--font-code);
+  font-size: 0.58rem; letter-spacing: 0.18em;
+  font-weight: 600;
+}
+.example-label--in  { color: var(--data-blue); }
+.example-label--out { color: var(--gpu-green); }
+.example-text {
+  font-size: 0.82rem; color: var(--white-dim);
+  font-style: italic;
+}
+.example-output {
+  background: var(--bg-deep); border: var(--border-subtle);
+  padding: 0.75rem 1rem; border-radius: 2px;
+  overflow-x: auto; margin-top: 0.15rem;
+}
+.example-output code {
+  font-family: var(--font-code);
+  font-size: 0.7rem; color: var(--gpu-bright);
+  white-space: pre-wrap; line-height: 1.55;
+}
+
+/* ============================================================
+   PIPELINE — Data Ingestion Flow
+   ============================================================ */
+
+/* Chunk type cards */
+.chunk-types {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1px; background: var(--white-ghost);
+  border: var(--border-subtle);
+  margin-bottom: 3rem;
+}
+.chunk-type {
+  background: var(--bg-panel);
+  padding: 1.25rem; text-align: center;
+  transition: background 0.2s;
+}
+.chunk-type:hover { background: var(--bg-card); }
+.chunk-type--highlight { background: var(--bg-card); }
+.chunk-ext {
+  font-family: var(--font-code);
+  font-size: 1.1rem; font-weight: 600;
+  color: var(--gpu-green);
+  letter-spacing: 0.05em; margin-bottom: 0.5rem;
+}
+.chunk-rule {
+  font-size: 0.75rem; color: var(--white-dim);
+  line-height: 1.6; margin-bottom: 0.5rem;
+}
+.chunk-rule code {
+  font-family: var(--font-code);
+  color: var(--gpu-bright); background: var(--gpu-bg);
+  padding: 0.05rem 0.25rem; border-radius: 1px;
+}
+.chunk-lib {
+  font-family: var(--font-code);
+  font-size: 0.62rem; color: var(--white-muted);
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+
+/* Pipeline steps */
+.pipeline-steps {
+  display: flex; flex-direction: column; gap: 0;
+  background: var(--white-ghost);
+  border: var(--border-subtle);
+  margin-bottom: 3rem;
+}
+.pipeline-step {
+  display: flex; align-items: flex-start; gap: 1.5rem;
+  background: var(--bg-panel);
+  padding: 1.75rem;
+  border-bottom: var(--border-subtle);
+  transition: background 0.2s;
+  position: relative;
+}
+.pipeline-step:last-child { border-bottom: none; }
+.pipeline-step:hover { background: var(--bg-card); }
+
+.ps-num {
+  font-family: var(--font-code);
+  font-size: 0.62rem; color: var(--gpu-green);
+  letter-spacing: 0.12em; font-weight: 600;
+  flex-shrink: 0; width: 24px;
+  margin-top: 0.2rem;
+}
+.ps-icon { font-size: 1.3rem; flex-shrink: 0; }
+.ps-body { flex: 1; }
+.ps-name {
+  font-size: 1rem; font-weight: 500;
+  color: var(--white-bright); margin-bottom: 0.2rem;
+}
+.ps-script {
+  font-family: var(--font-code);
+  font-size: 0.68rem; color: var(--gpu-green);
+  margin-bottom: 0.5rem;
+}
+.ps-script code { color: var(--gpu-green); }
+.ps-desc {
+  font-size: 0.82rem; color: var(--white-dim);
+  line-height: 1.65; margin-bottom: 0.75rem;
+}
+.ps-flow {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-family: var(--font-code); font-size: 0.72rem;
+  margin-bottom: 0.65rem;
+}
+.ps-input  { color: var(--white-muted); }
+.ps-arrow  { color: var(--gpu-green); font-weight: 600; }
+.ps-output { color: var(--gpu-bright); }
+.ps-tech   { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.ps-pill {
+  font-family: var(--font-code);
+  font-size: 0.6rem; padding: 0.15rem 0.45rem;
+  border: var(--border-green); color: var(--gpu-green);
+  border-radius: 1px; letter-spacing: 0.05em;
+  background: var(--gpu-bg);
+}
+
+/* Pipeline summary stats */
+.pipeline-stats {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1px; background: var(--white-ghost);
+  border: var(--border-subtle);
+}
+.pstat {
+  background: var(--bg-panel);
+  padding: 1.5rem; text-align: center;
+  transition: background 0.2s;
+}
+.pstat:hover { background: var(--bg-card); }
+.pstat-val {
+  font-family: var(--font-code);
+  font-size: 1.3rem; font-weight: 300;
+  color: var(--gpu-green); margin-bottom: 0.35rem;
+  line-height: 1.2;
+}
+.pstat-lbl {
+  font-size: 0.65rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--white-muted);
+}
+
+/* ============================================================
+   TECH STACK — Card grid
+   ============================================================ */
+.tech-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--white-ghost);
+  border: var(--border-subtle);
+}
+.tech-card {
+  background: var(--bg-panel);
+  padding: 1.75rem 1.5rem;
+  transition: background 0.2s;
+  position: relative;
+}
+.tech-card:hover { background: var(--bg-card); }
+.tech-card::before {
+  content: ''; position: absolute;
+  left: 0; top: 0; bottom: 0; width: 0;
+  background: var(--gpu-green);
+  transition: width 0.2s ease;
+}
+.tech-card:hover::before { width: 2px; }
+
+.tech-card-top {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+.tech-icon { font-size: 1.35rem; }
+.tech-tag {
+  font-family: var(--font-code);
+  font-size: 0.55rem; letter-spacing: 0.14em;
+  text-transform: uppercase; padding: 0.15rem 0.4rem;
+  border-radius: 1px; border: 1px solid;
+}
+.tech-tag--llm       { color: var(--gpu-bright); border-color: rgba(118,185,0,0.3); background: var(--gpu-bg); }
+.tech-tag--vector-db { color: var(--data-blue);  border-color: rgba(56,189,248,0.3); background: rgba(56,189,248,0.05); }
+.tech-tag--embeddings{ color: var(--data-purple);border-color: rgba(167,139,250,0.3); background: rgba(167,139,250,0.05); }
+.tech-tag--gpu       { color: var(--gpu-green);  border-color: rgba(118,185,0,0.3); background: var(--gpu-bg); }
+.tech-tag--inference { color: var(--data-amber); border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.05); }
+.tech-tag--ui        { color: var(--white-dim);  border-color: rgba(255,255,255,0.15); background: transparent; }
+.tech-tag--ml        { color: var(--data-amber); border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.05); }
+.tech-tag--api       { color: var(--white-muted);border-color: rgba(255,255,255,0.1); background: transparent; }
+
+.tech-name {
+  font-size: 0.95rem; font-weight: 500;
+  color: var(--white-bright); margin-bottom: 0.5rem;
+}
+.tech-desc {
+  font-size: 0.78rem; color: var(--white-muted); line-height: 1.6;
+}
+
+/* ============================================================
+   GITHUB STATS / SETUP
+   ============================================================ */
+.badges-row {
+  display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center;
+  margin-bottom: 2rem;
+}
+.badges-row img { border-radius: 2px; height: 20px; }
+
+/* Terminal block */
+.terminal-block {
+  background: var(--bg-panel);
+  border: var(--border-panel);
+  border-radius: 4px; overflow: hidden;
+  margin-bottom: 2rem;
+}
+.terminal-bar {
+  display: flex; align-items: center; gap: 6px;
+  padding: 0.6rem 1rem;
+  background: var(--bg-card);
+  border-bottom: var(--border-subtle);
+}
+.tb-dot {
+  width: 12px; height: 12px; border-radius: 50%;
+}
+.tb-dot--r { background: #ff5f57; }
+.tb-dot--y { background: #ffbd2e; }
+.tb-dot--g { background: var(--gpu-green); }
+.tb-title {
+  font-family: var(--font-code);
+  font-size: 0.7rem; color: var(--white-muted);
+  margin-left: 0.5rem; letter-spacing: 0.05em;
+}
+.terminal-code {
+  padding: 1.5rem;
+  overflow-x: auto;
+}
+.terminal-code code {
+  font-family: var(--font-code);
+  font-size: 0.82rem; line-height: 1.75;
+  color: var(--white-dim);
+}
+.tc-cmd   { color: var(--gpu-bright); font-weight: 500; }
+.tc-comment { color: var(--white-muted); }
+
+/* File tree */
+.file-tree {
+  background: var(--bg-panel);
+  border: var(--border-panel); border-radius: 4px; overflow: hidden;
+}
+.ft-label {
+  padding: 0.6rem 1.25rem;
+  font-family: var(--font-code);
+  font-size: 0.62rem; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--white-muted);
+  background: var(--bg-card); border-bottom: var(--border-subtle);
+}
+.ft-code {
+  padding: 1.25rem 1.5rem; overflow-x: auto;
+}
+.ft-code code {
+  font-family: var(--font-code);
+  font-size: 0.78rem; line-height: 1.8;
+  color: var(--white-dim);
+}
+.ft-green { color: var(--gpu-bright); }
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.gpu-footer {
+  background: var(--bg-panel);
+  border-top: 2px solid var(--gpu-green);
+  padding: 2rem 0;
+}
+.footer-inner {
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 0.75rem;
+  font-size: 0.72rem; letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+}
+.footer-brand {
+  font-family: var(--font-code);
+  color: var(--gpu-green); font-weight: 600;
+  letter-spacing: 0.08em;
+}
+.footer-sep { color: var(--white-muted); margin: 0 0.4rem; }
+.footer-sub { color: var(--white-muted); }
+.footer-center { color: var(--white-muted); }
+.footer-center .green { color: var(--gpu-green); }
+.footer-right a {
+  color: var(--gpu-green); text-decoration: none;
+  transition: opacity 0.2s;
+}
+.footer-right a:hover { opacity: 0.75; }
+.footer-tagline {
+  text-align: center;
+  font-family: var(--font-code);
+  font-size: 0.62rem; color: var(--white-ghost);
+  letter-spacing: 0.1em;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 1100px) {
+  .tech-grid { grid-template-columns: repeat(2, 1fr); }
+  .modes-grid { grid-template-columns: 1fr; }
+  .mode-body { display: block; }
+  .mode-card--active { box-shadow: none; }
+}
+
+@media (max-width: 900px) {
+  .rag-pipeline { flex-wrap: wrap; justify-content: center; }
+  .arch-stage { min-width: 140px; flex: 0 1 auto; }
+  .arch-connector { display: none; }
+  .arch-callouts { grid-template-columns: 1fr; }
+  .chunk-types { grid-template-columns: repeat(2, 1fr); }
+  .pipeline-stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  :root { --section-pad: 4rem 0; }
+  .nav-inner { padding: 0 1.25rem; }
+  .nav-toggle { display: flex; }
+  .nav-links {
+    display: none; position: absolute; top: 64px; left: 0; right: 0;
+    flex-direction: column; background: rgba(8,8,9,0.98);
+    border-bottom: var(--border-subtle); padding: 0.5rem 0;
+    gap: 0;
+  }
+  .nav-links.open { display: flex; }
+  .nav-link {
+    height: auto; padding: 0.85rem 2rem;
+    border-bottom: none; border-left: 2px solid transparent;
+  }
+  .nav-link:hover { border-left-color: var(--gpu-green); }
+  .nav-github { margin: 0.5rem 2rem !important; height: auto !important; }
+  .hero-hud { flex-wrap: wrap; }
+  .hud-item { min-width: 100px; }
+  .tech-grid { grid-template-columns: 1fr; }
+  .pipeline-step { flex-wrap: wrap; }
+  .container { padding: 0 1.25rem; }
+  .footer-inner { flex-direction: column; text-align: center; }
+}
+
+@media (max-width: 480px) {
+  .hero-title { font-size: 2rem; }
+  .hero-cta { flex-direction: column; align-items: center; }
+  .btn { width: 100%; max-width: 280px; text-align: center; }
+  .chunk-types { grid-template-columns: 1fr; }
+  .pipeline-stats { grid-template-columns: repeat(2, 1fr); }
+  .hero-hud { flex-direction: column; }
+  .hud-divider { width: auto; height: 1px; }
+  .modes-grid { grid-template-columns: 1fr; }
+}
+
+/* --- Reduced Motion --- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  .warp-scan { animation: none; }
+  .connector-dot { animation: none; }
+  .cursor { animation: none; opacity: 1; }
+  .scroll-indicator { display: none; }
+  .arch-stage {
+    opacity: 1; transform: none;
+    animation: none !important;
+  }
+}

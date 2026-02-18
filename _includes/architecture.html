@@ -1,0 +1,94 @@
+<section class="section" id="architecture" aria-label="Architecture">
+  <div class="container">
+    <h2 class="section-title">RAG Architecture</h2>
+    <p class="section-desc">
+      Five-stage retrieval-augmented generation pipeline — fully offline, runs on your local GPU
+    </p>
+
+    <!-- Animated pipeline -->
+    <div class="rag-pipeline" id="rag-pipeline" role="list">
+
+      <div class="arch-stage" data-stage="0" role="listitem">
+        <div class="stage-icon">💬</div>
+        <div class="stage-name">Query</div>
+        <div class="stage-detail">User prompt enters via Streamlit UI with mode selection (Gen / Debug / GPU)</div>
+        <div class="stage-badge">app.py</div>
+      </div>
+
+      <div class="arch-connector" aria-hidden="true">
+        <div class="connector-line"></div>
+        <div class="connector-dot"></div>
+      </div>
+
+      <div class="arch-stage" data-stage="1" role="listitem">
+        <div class="stage-icon">📐</div>
+        <div class="stage-name">Embed</div>
+        <div class="stage-detail">Query encoded by all-MiniLM-L6-v2 into a 384-dim L2-normalised vector</div>
+        <div class="stage-badge">SentenceTransformers</div>
+      </div>
+
+      <div class="arch-connector" aria-hidden="true">
+        <div class="connector-line"></div>
+        <div class="connector-dot"></div>
+      </div>
+
+      <div class="arch-stage" data-stage="2" role="listitem">
+        <div class="stage-icon">🗄️</div>
+        <div class="stage-name">Retrieve</div>
+        <div class="stage-detail">ChromaDB cosine search returns top-K chunks from 8,528 indexed cuDF files</div>
+        <div class="stage-badge">ChromaDB</div>
+      </div>
+
+      <div class="arch-connector" aria-hidden="true">
+        <div class="connector-line"></div>
+        <div class="connector-dot"></div>
+      </div>
+
+      <div class="arch-stage" data-stage="3" role="listitem">
+        <div class="stage-icon">📝</div>
+        <div class="stage-name">Prompt</div>
+        <div class="stage-detail">Task-specific template injects retrieved context as grounding evidence for the LLM</div>
+        <div class="stage-badge">prompt_templates.py</div>
+      </div>
+
+      <div class="arch-connector" aria-hidden="true">
+        <div class="connector-line"></div>
+        <div class="connector-dot"></div>
+      </div>
+
+      <div class="arch-stage arch-stage--final" data-stage="4" role="listitem">
+        <div class="stage-icon">⚡</div>
+        <div class="stage-name">Generate</div>
+        <div class="stage-detail">Qwen2.5-Coder-14B on LM Studio returns grounded, GPU-first code answers</div>
+        <div class="stage-badge">LM Studio · localhost:1234</div>
+      </div>
+
+    </div>
+
+    <!-- Key design callouts -->
+    <div class="arch-callouts">
+      <div class="callout">
+        <span class="callout-icon">🔒</span>
+        <div>
+          <div class="callout-title">Fully Offline</div>
+          <div class="callout-desc">No API keys. No cloud calls. Everything runs on localhost.</div>
+        </div>
+      </div>
+      <div class="callout">
+        <span class="callout-icon">📚</span>
+        <div>
+          <div class="callout-title">Grounded Answers</div>
+          <div class="callout-desc">Every response is anchored to real cuDF source code, not hallucination.</div>
+        </div>
+      </div>
+      <div class="callout">
+        <span class="callout-icon">⚙️</span>
+        <div>
+          <div class="callout-title">Context-Configurable</div>
+          <div class="callout-desc">Slider control for retrieved chunks (2–8) balances depth vs. speed.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>

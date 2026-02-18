@@ -1,0 +1,48 @@
+<section class="section" id="modes" aria-label="Query modes">
+  <div class="container">
+    <h2 class="section-title">Three Specialised Modes</h2>
+    <p class="section-desc">
+      Each mode uses a purpose-built prompt template, tuned for its specific task
+    </p>
+
+    <div class="modes-grid" role="tablist" aria-label="Query modes">
+      {% for mode in site.data.modes %}
+      <div class="mode-card {% if forloop.first %}mode-card--active{% endif %}"
+           id="mode-{{ mode.id }}"
+           role="tab"
+           tabindex="{{ forloop.index0 }}"
+           aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+           data-mode="{{ mode.id }}">
+
+        <div class="mode-header">
+          <span class="mode-icon">{{ mode.icon }}</span>
+          <div class="mode-title-group">
+            <h3 class="mode-name">{{ mode.name }}</h3>
+            <span class="mode-tag">{{ mode.tag }}</span>
+          </div>
+        </div>
+
+        <p class="mode-desc">{{ mode.description }}</p>
+
+        <div class="mode-body">
+          <div class="mode-prompt-label">Prompt Template</div>
+          <pre class="mode-prompt"><code>{{ mode.prompt_excerpt }}</code></pre>
+
+          <div class="mode-example">
+            <div class="example-row">
+              <span class="example-label example-label--in">INPUT</span>
+              <span class="example-text">{{ mode.example_input }}</span>
+            </div>
+            <div class="example-row">
+              <span class="example-label example-label--out">OUTPUT</span>
+              <pre class="example-output"><code>{{ mode.example_output }}</code></pre>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</section>

@@ -1,0 +1,56 @@
+<section class="section section--last" id="stats" aria-label="GitHub stats">
+  <div class="container">
+    <h2 class="section-title">Get Started</h2>
+    <p class="section-desc">Clone, index, and query — three commands to a local GPU code tutor</p>
+
+    <!-- Badges -->
+    <div class="badges-row">
+      <img src="https://img.shields.io/badge/Python-3.10+-76b900?style=flat-square&logo=python&logoColor=white" alt="Python 3.10+">
+      <img src="https://img.shields.io/badge/LM_Studio-Qwen2.5--Coder--14B-76b900?style=flat-square&logo=openai&logoColor=white" alt="LM Studio">
+      <img src="https://img.shields.io/badge/ChromaDB-Vector_DB-76b900?style=flat-square" alt="ChromaDB">
+      <img src="https://img.shields.io/badge/RAPIDS-cuDF-76b900?style=flat-square&logo=nvidia&logoColor=white" alt="RAPIDS cuDF">
+      <img src="https://img.shields.io/badge/Streamlit-UI-76b900?style=flat-square&logo=streamlit&logoColor=white" alt="Streamlit">
+      <img src="https://img.shields.io/github/stars/ShubbhRM/LLM_Hackathon?style=flat-square&color=76b900" alt="GitHub Stars">
+    </div>
+
+    <!-- Quick start terminal -->
+    <div class="terminal-block">
+      <div class="terminal-bar">
+        <span class="tb-dot tb-dot--r"></span>
+        <span class="tb-dot tb-dot--y"></span>
+        <span class="tb-dot tb-dot--g"></span>
+        <span class="tb-title">bash — LLM_Hackathon setup</span>
+      </div>
+      <pre class="terminal-code"><code><span class="tc-comment"># 1. Clone &amp; install</span>
+<span class="tc-cmd">git</span> clone https://github.com/ShubbhRM/LLM_Hackathon.git
+<span class="tc-cmd">cd</span> LLM_Hackathon
+<span class="tc-cmd">pip</span> install -r requirements.txt
+
+<span class="tc-comment"># 2. Build the vector index (one-time, ~5–10 min)</span>
+<span class="tc-cmd">python</span> auto_chunker.py   <span class="tc-comment"># chunks 8,528 cuDF files</span>
+<span class="tc-cmd">python</span> build_index.py    <span class="tc-comment"># embeds &amp; stores in ChromaDB</span>
+
+<span class="tc-comment"># 3. Start LM Studio with Qwen2.5-Coder-14B at localhost:1234</span>
+<span class="tc-comment"># 4. Launch the app</span>
+<span class="tc-cmd">streamlit</span> run app.py</code></pre>
+    </div>
+
+    <!-- File tree -->
+    <div class="file-tree">
+      <div class="ft-label">Project structure</div>
+      <pre class="ft-code"><code>LLM_Hackathon/
+├── <span class="ft-green">app.py</span>               ← Streamlit UI (mode selector, chunk slider)
+├── <span class="ft-green">auto_chunker.py</span>      ← Multi-format document ingestion
+├── <span class="ft-green">build_index.py</span>       ← Embedding + ChromaDB indexing
+├── <span class="ft-green">rag_utils.py</span>         ← Retrieval module (used by app.py)
+├── <span class="ft-green">rag_query.py</span>         ← Standalone CLI query tool
+├── <span class="ft-green">llm_utils.py</span>         ← LM Studio OpenAI-compat wrapper
+├── <span class="ft-green">prompt_templates.py</span>  ← Three task-specific prompt templates
+├── dataset/
+│   └── cudf/            ← RAPIDS cuDF source (8,528 files — knowledge base)
+├── chunks.jsonl          ← Generated: chunked documents
+└── chroma_db/            ← Generated: persistent vector store</code></pre>
+    </div>
+
+  </div>
+</section>
